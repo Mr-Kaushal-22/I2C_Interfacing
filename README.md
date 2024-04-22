@@ -1,4 +1,5 @@
 # I2C_Interfacing
+This Project is synthesised and implemented on Efinix Efinity software for Trion T120 FPGA board.
 
 This easy to use System Verilog I2C master module allows easy drop in operation into any FPGA project and allows for effective and reliable I2C master operation.
 
