@@ -12,7 +12,7 @@ module i2c_master#(
     input       [ADDR_WIDTH-1:0]    i_device_addr,
     input       [DATA_WIDTH-1:0]    i_num_byte,
     input       [15:0]              i_divider, // value = 124 for 50 MHz clock freq.
-    output reg                      o_en_ack = 0,
+    output                          o_en_ack,
     output                          o_data_valid_out,
     output reg  [DATA_WIDTH-1:0]    o_miso_data ,
     output reg                      o_busy = 0,
@@ -63,6 +63,7 @@ reg                     enable = 0;
 reg                     rw = 0;
 reg                     ack_received =0;
 reg                     flag_data_valid_out = 0;
+reg                     flag_en_ack = 0;
 
 /* Assignment statements */
 assign scl_out  = r_scl_out;
@@ -76,6 +77,8 @@ assign scl_oe = (state!=S_IDLE && proc_counter!=1 && proc_counter!=2);
 
 // Data valid signal for MISO data 
 assign o_data_valid_out = (flag_data_valid_out && (divider_counter==0)) ? 1 : 0;
+// Enable acknowledge for i2c_ctrl
+assign o_en_ack = (flag_en_ack && (divider_counter==0)) ? 1 : 0;
 
 /* I2C divider tick geneartor */
 always@(posedge i_clk)begin
@@ -105,7 +108,7 @@ if(divider_tick)begin
             rw                <= i_rw;
             
             if(enable)begin
-                o_en_ack <= 1;
+                flag_en_ack <= 1;
                 state <= S_START;
             end
         end	// S_IDLE
@@ -113,7 +116,7 @@ if(divider_tick)begin
         S_START: begin // 1
             case(proc_counter)
                 PC0: begin
-                    o_en_ack     <= 0;
+                    flag_en_ack     <= 0;
                     o_busy       <= 1;
                     enable       <= 0;
                     proc_counter <= PC1;
@@ -228,7 +231,7 @@ if(divider_tick)begin
                         if(byte_counter < saved_num_byte) begin
                             if(i_enable) begin
                                 saved_mosi_data <= i_mosi_data;
-                                o_en_ack <= 1;
+                                flag_en_ack <= 1;
                             end
                         end
                     end
@@ -237,7 +240,7 @@ if(divider_tick)begin
                 PC3: begin
                     if(bit_counter == 0)begin
                         if(byte_counter < saved_num_byte) begin
-                            o_en_ack     <= 0;
+                            flag_en_ack     <= 0;
                             state        <= S_CHECK_ACK;
                             post_state   <= S_WRITE_REG_DATA;
                             post_sda_out <= saved_mosi_data[DATA_WIDTH-1];
