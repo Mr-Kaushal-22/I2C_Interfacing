@@ -1,5 +1,4 @@
 # I2C_Interfacing
-This Project is synthesised and implemented on Efinix Efinity software for Trion T120 FPGA board.
 
 This easy to use System Verilog I2C master module allows easy drop in operation into any FPGA project and allows for effective and reliable I2C master operation.
 
@@ -17,7 +16,11 @@ Each time our divider tick pulses process counter is incremented (the state exec
 When process_counter = 1, the SCL line is released and placed in the high Z state. During this time the master checks for any clock stretching being attempted by the slave. If no clock stretching is detected, the master will iterate through the remaining processes and continue as normal. However if clock stretching is detected, the master will stay in the process_counter = 1 process until SCL line is high once more.
 
 ## State Diagram
+### I2C Controller FSM
+![I2C_Controller_FSM](Documents/i2c_ctrl_fsm.svg)
 
+### I2C Master FSM
+![I2C_Master_FSM](Documents/i2c_master_fsm.svg)
 
 ## Input command format for design
 ![Data_frame_design](Documents/i2c_design_data_frame.svg)
@@ -40,9 +43,13 @@ Here the input is command as
 3. Reading data Command  - E1 06
 4. Sleep Command - E0 02 B0 98
 
+### Logic analyzer screenshots
+![logic_analyzer1](Documents/logic_analyzer1.png)
+![logic_analyzer2](Documents/logic_analyzer2.png)
+
 Here we got reading from temperature and humidity sensor as
 
--> 6D 44 6D 6E FC 46
+-> 6B C6 2F 69 0F 39
 
 The firsr 3 bytes are regarding the temperature and the last 3 are regarding humidity.
 
@@ -50,4 +57,4 @@ These values can be converted back to standard values using the following formul
 
 ![Reading_conversion_formula](Documents/reading_conversion_formula.png)
 
-As our input clock is of 50 MHz. So, the value of temperature read by the sensor is 29.693 degree celcius.
+As our input clock is of 50 MHz. So, the value of temperature read by the sensor is 28.673 degree celcius.
